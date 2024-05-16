@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robux Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: yellow;
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 5px, pink 5px, pink 10px);
+            text-align: center;
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .robux-options {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        .robux-option {
+            border: 1px solid pink;
+            padding: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .selected {
+            border: 2px solid blue !important;
+        }
+        .robux-option:hover {
+            transform: scale(1.05);
+        }
+        #generation-message {
+            margin-top: 30px;
+            color: pink;
+        }
+        .close-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            cursor: pointer;
+            border: none;
+            margin-top: 20px;
+        }
+        #falling-robux {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .robux {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-image: url('robux.png');
+            background-size: cover;
+        }
+        .error-message {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Robux Generator</h2>
+        <input type="text" id="usernameInput" placeholder="Entrer le nom d'utilisateur du compte Roblox" oninput="validateUsername(this)">
+        <br>
+        <div id="usernameError" class="error-message" style="display: none;">Le pseudo doit contenir entre 3 et 20 caractères.</div>
+        <button class="button" onclick="searchAccount()">Valider</button>
+        <div id="searchingMessage" style="display: none; color: pink; margin-top: 20px;">Recherche du compte Roblox...</div>
+        <div id="robuxOptions" style="display: none;" class="robux-options">
+            <div class="robux-option" onclick="selectAmount(500)">500 Robux</div>
+            <div class="robux-option" onclick="selectAmount(1000)">1000 Robux</div>
+            <div class="robux-option" onclick="selectAmount(1500)">1500 Robux</div>
+            <div class="robux-option" onclick="selectAmount(2000)">2000 Robux</div>
+        </div>
+        <div id="robuxError" class="error-message" style="display: none;">Veuillez sélectionner une quantité de Robux.</div>
+        <button id="validateButton" class="button" style="display: none; margin-top: 20px;" onclick="generateRobux()">Valider</button>
+        <div id="generationMessage" style="display: none;">
+            Génération des Robux à votre compte...
+        </div>
+        <div id="successMessage" style="display: none; margin-top: 20px; color: green;">
+            Vous avez reçu les Robux sur votre compte.
+            <br>
+            <button class="close-button" onclick="closeSuccessMessage()">Fermer le message</button>
+        </div>
+        <div id="prankMessage" style="display: none; margin-top: 20px; color: green;">
+            Je t'ai eu, c'était une blague. Va t'acheter des Robux !
+        </div>
+    </div>
+
+    <div id="falling-robux"></div>
+
+    <script>
+        function validateUsername(input) {
+            input.value = input.value.replace(/[^a-zA-Z0-9_À-ÿ]/g, '');
+            if (input.value.length < 3 || input.value.length > 20) {
+                document.getElementById('usernameError').style.display = 'block';
+            } else {
+                document.getElementById('usernameError').style.display = 'none';
+            }
+        }
+
+        function searchAccount() {
+            var username = document.getElementById('usernameInput').value;
+            if (document.getElementById('usernameError').style.display === 'block') {
+                return;
+            }
+            document.getElementById('searchingMessage').style.display = 'block';
+            setTimeout(function() {
+                document.getElementById('searchingMessage').style.display = 'none';
+                document.getElementById('robuxOptions').style.display = 'flex';
+                document.getElementById('validateButton').style.display = 'block';
+            }, 2000);
+        }
+
+        function selectAmount(amount) {
+            var options = document.getElementsByClassName('robux-option');
+            for (var i = 0; i < options.length; i++) {
+                options[i].classList.remove('selected');
+            }
+            event.target.classList.add('selected');
+            document.getElementById('robuxOptions').setAttribute('data-selected', amount);
+            document.getElementById('robuxError').style.display = 'none';
+        }
+
+        function generateRobux() {
+            var selectedAmount = document.getElementById('robuxOptions').getAttribute('data-selected');
+            if (!selectedAmount) {
+                document.getElementById('robuxError').style.display = 'block';
+                return;
+            }
+            document.getElementById('validateButton').style.display = 'none';
+            document.getElementById('generationMessage').style.display = 'block';
+            setTimeout(function() {
+                document.getElementById('generationMessage').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                startFallingRobux();
+            }, 2000);
+        }
+
+        function closeSuccessMessage() {
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('prankMessage').style.display = 'block';
+        }
+
+        function startFallingRobux() {
+            var container = document.getElementById('falling-robux');
+            for (var i = 0; i < 50; i++) {
+                var robux = document.createElement('div');
+                robux.classList.add('robux');
+                robux.style.left = Math.random() * 100 + 'vw';
+                robux.style.animationDuration = Math.random() * 3 + 2 + 's';
+                robux.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(robux);
+                robux.addEventListener('animationend', function() {
+                    this.remove();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
